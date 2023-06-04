@@ -10,7 +10,7 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('Subtitle')
         self.clock = pygame.time.Clock()
-        self.music = Music(self.screen)
+        self.music = Music()
         self.bgList = list(filter(lambda x: 'png' in x, os.listdir('./images/background')))
 
     def run(self):
@@ -36,8 +36,13 @@ class Game:
             bg_img = pygame.transform.scale(bg_img, (WIDTH, HEIGHT))
             index = (index + 1) % len(self.bgList)
 
+            bg_filter = self.screen.copy().convert()
+            pygame.draw.rect(bg_filter, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
+            bg_filter.set_alpha(100)
+
             self.screen.blit(bg_img, (0, 0))
-            self.music.update_bars(delta_time)
+            self.screen.blit(bg_filter, (0, 0))
+            self.music.update_bars(self.screen, delta_time)
 
             pygame.display.update()
             self.clock.tick(FPS)

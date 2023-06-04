@@ -95,10 +95,9 @@ class AverageAudioBar(AudioBar):
 
 
 class Music:
-    def __init__(self, screen):
+    def __init__(self):
         self._analyzer = AudioAnalyzer()
         self._song = ""
-        self._screen = screen
 
         self._bars = []
         self._bar_height = (HEIGHT / 2) - (BAR_MAX_HEIGHT / 2)
@@ -148,7 +147,7 @@ class Music:
         self._song = song
         self._analyzer.load(self._song)
 
-    def update_bars(self, delta_time):
+    def update_bars(self, screen, delta_time):
 
         for b1 in self._bars:
             for b in b1:
@@ -160,5 +159,5 @@ class Music:
                 x_end = BAR_START + (BAR_WIDTH + SPACE) * 32 + 30 - SPACE
                 y_end = self._bar_height + BAR_MAX_HEIGHT
 
-                b.render(self._screen)
-                pygame.draw.line(self._screen, BAR_DEFAULT_COLOR, (x_start, y_start), (x_end, y_end), width=LINE_WIDTH)
+                b.render(screen)
+                pygame.draw.line(screen, BAR_DEFAULT_COLOR, (x_start, y_start), (x_end, y_end), width=LINE_WIDTH)
