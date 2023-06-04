@@ -1,7 +1,7 @@
-import pygame
 import sys
+import os
 
-from setting import *
+from audio import *
 
 
 class Game:
@@ -10,21 +10,37 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('Subtitle')
         self.clock = pygame.time.Clock()
-        self.index = 0
+        self.music = Music(self.screen)
+        self.bgList = list(filter(lambda x: 'png' in x, os.listdir('./images/background')))
 
     def run(self):
+        t = pygame.time.get_ticks()
+        get_ticks_last_frame = t
+
+        index = 0
+        self.bgList.sort(key=lambda x: (len(x), x))
+        self.music.change_song("musics/music.mp3")
+        self.music.music_start()
+
         while True:
+            t = pygame.time.get_ticks()
+            delta_time = (t - get_ticks_last_frame) / 1000.0
+            get_ticks_last_frame = t
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-            bg_img = pygame.image.load(f'images/background/{self.index}.gif')
+            bg_img = pygame.image.load("images/background/" + self.bgList[index])
             bg_img = pygame.transform.scale(bg_img, (WIDTH, HEIGHT))
+            index = (index + 1) % len(self.bgList)
+
             self.screen.blit(bg_img, (0, 0))
+            self.music.update_bars(delta_time)
+
             pygame.display.update()
             self.clock.tick(FPS)
-            self.index = (self.index + 1) % 49
 
 
 if __name__ == '__main__':
