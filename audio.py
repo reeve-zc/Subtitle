@@ -94,7 +94,7 @@ class AverageAudioBar(AudioBar):
         self.update(dt, self.avg)
 
 
-class Music:
+class Audio:
     def __init__(self):
         self._analyzer = AudioAnalyzer()
         self._song = ""
