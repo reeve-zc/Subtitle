@@ -45,21 +45,35 @@ class Player:
         self._duration = 0
         self._playing_pos = 0
         self._playing = False
+        self._end = False
         self._song = None
         self._song_name = SongName()
         self._audio = Audio()
 
+    def reset(self):
+        self._playing = False
+        self._end = False
+
     def start(self):
         self._music.load(self._song)
-        self._playing_pos = 0
         self._music.play(0)
+        self._end = False
         self._song_name.playing = True
 
+    def restart(self):
+        self._music.play(0)
+        self._playing_pos = 0
+        self._end = False
+        if not self._playing:
+            self.pause()
+
     def change_song(self, filename):
+        self.reset()
         self._song = filename
         self._song_name.update_song(filename[7:])
         self._duration = AudioSegment.from_mp3(self._song).duration_seconds
         self._audio.load(self._song)
+
         self.start()
         self.pause()
 
@@ -67,12 +81,17 @@ class Player:
         self._playing = not self._playing
 
     def pause(self):
+        self._playing_pos = self._music.get_pos()
         self._music.pause()
         self._song_name.playing = False
 
     def unpause(self):
-        self._music.unpause()
-        self._song_name.playing = True
+        if self._end:
+            self.start()
+        else:
+            self.set_time(self._playing_pos / 1000)
+            self._music.unpause()
+            self._song_name.playing = True
 
     def stop(self):
         self._music.stop()
@@ -82,7 +101,12 @@ class Player:
         self._music.set_pos(time)
 
     def get_time(self):
-        return (self._music.get_pos() - self._playing_pos) / 1000
+        time = (self._music.get_pos() - self._playing_pos) / 1000
+
+        if time + 1 >= self._duration:
+            self._end = True
+            self._playing = self._song_name.playing = False
+        return time
 
     def get_volume(self):
         return self._music.get_volume()
@@ -124,7 +148,7 @@ class Background:
         self._path = path
         self._bgList = list(filter(lambda x: 'png' in x, os.listdir(self._path)))
         self._bgList.sort(key=lambda x: (len(x), x))
-        self._surface = [pygame.image.load("images/background/" + x) for x in self._bgList]
+        self._surface = [pygame.image.load("images/background/" + x).convert() for x in self._bgList]
         self._bg_img = self._surface[0]
 
     def load_bg_img(self, screen):
@@ -160,7 +184,7 @@ class Game:
         t = pygame.time.get_ticks()
         get_ticks_last_frame = t
 
-        self.player.change_song("musics/【完整版】鈴芽之旅 主題曲 - RADWIMPS - すずめ (feat. 十明)『中日字幕』.mp3")
+        self.player.change_song("musics/告五人 Accusefive【帶我去找夜生活 Night life.Take us to the light】Official Music Video.mp3")
 
         while True:
             t = pygame.time.get_ticks()
@@ -181,7 +205,14 @@ class Game:
                         self.player.reverse_state()
 
                     if btn_reset.rect.collidepoint(pos):
-                        self.player.start()
+                        btn_reset.state = True
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    self.player.unpause() if self.player.playing else self.player.pause()
+
+                    if btn_reset.state:
+                        self.player.restart()
+                        btn_reset.state = False
 
             self.background.load_bg_img(self.screen)
 
@@ -192,10 +223,8 @@ class Game:
 
             if self.player.playing:
                 self.screen.blit(btn_pause.img, btn_pause.rect)
-                self.player.unpause()
             else:
                 self.screen.blit(btn_play.img, btn_play.rect)
-                self.player.pause()
 
             self.player.showing(self.screen, delta_time)
 
