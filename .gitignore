@@ -1,5 +1,7 @@
 images/
 musics/
+fonts/
+test.py
 .DS_Store
 .idea/
 __pycache__/

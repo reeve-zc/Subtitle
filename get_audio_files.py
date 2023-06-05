@@ -1,6 +1,5 @@
 from yt_dlp import YoutubeDL
 
-
 option = {'final_ext': 'mp3',
           'format': 'bestaudio/best',
           'postprocessors': [{'key': 'FFmpegExtractAudio',
@@ -13,7 +12,7 @@ option = {'final_ext': 'mp3',
 def download_song(link):
     try:
         with YoutubeDL(option) as ydl:
-            ydl.download([link])
+            ydl.download(link)
     except:
         print("Download failed.")
 

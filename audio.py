@@ -1,4 +1,4 @@
-import librosa.display
+import librosa
 import numpy as np
 import pygame
 
@@ -97,10 +97,7 @@ class AverageAudioBar(AudioBar):
 class Audio:
     def __init__(self):
         self._analyzer = AudioAnalyzer()
-        self._song = ""
-
         self._bars = []
-        self._bar_height = (HEIGHT / 2) - (BAR_MAX_HEIGHT / 2)
         self.audio_init()
 
     def audio_init(self):
@@ -134,30 +131,20 @@ class Audio:
         for g in tmp_bars:
             gr = []
             for c in g:
-                gr.append(AverageAudioBar(w, self._bar_height, c, color=BAR_DEFAULT_COLOR,
+                gr.append(AverageAudioBar(w, BAR_HEIGHT + 20, c, color=DEFAULT_COLOR,
                                           width=BAR_WIDTH, max_height=BAR_MAX_HEIGHT))
                 w += BAR_WIDTH + SPACE
             self._bars.append(gr[0: 20])
 
-    def music_start(self):
-        pygame.mixer.music.load(self._song)
-        pygame.mixer.music.play(0)
-
-    def change_song(self, song):
-        self._song = song
-        self._analyzer.load(self._song)
-
-    def update_bars(self, screen, delta_time):
+    def update_bars(self, screen, delta_time, pos):
 
         for b1 in self._bars:
             for b in b1:
-                b.update_all(delta_time, pygame.mixer.music.get_pos() / 1000.0, self._analyzer)
+                b.update_all(delta_time, pos, self._analyzer)
         for b1 in self._bars:
             for b in b1:
-                x_start = BAR_START - 30
-                y_start = self._bar_height + BAR_MAX_HEIGHT
-                x_end = BAR_START + (BAR_WIDTH + SPACE) * 32 + 30 - SPACE
-                y_end = self._bar_height + BAR_MAX_HEIGHT
-
                 b.render(screen)
-                pygame.draw.line(screen, BAR_DEFAULT_COLOR, (x_start, y_start), (x_end, y_end), width=LINE_WIDTH)
+                pygame.draw.line(screen, DEFAULT_COLOR, (X_START, Y_START), (X_END, Y_END), width=LINE_WIDTH)
+
+    def load(self, song):
+        self._analyzer.load(song)

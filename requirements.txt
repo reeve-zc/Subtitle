@@ -1,5 +1,6 @@
-librosa~=0.10.0.post2
-numpy==1.24.3
-pygame==2.4.0
+librosa
+numpy
+pygame
 yt_dlp
 ffmpeg
+pydub
