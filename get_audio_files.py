@@ -9,12 +9,24 @@ option = {'final_ext': 'mp3',
           'outtmpl': 'musics/%(title)s.%(ext)s'}
 
 
+def get_info(link):
+    try:
+        with YoutubeDL(option) as ydl:
+            info_dict = ydl.extract_info(link, download=False)
+            video_url = info_dict.get("url", None)
+            video_id = info_dict.get("id", None)
+            video_title = info_dict.get('title', None)
+            return info_dict
+    except:
+        return False
+
+
 def download_song(link):
     try:
         with YoutubeDL(option) as ydl:
             ydl.download(link)
     except:
-        print("Download failed.")
+        print("Download failed")
 
 
 if __name__ == "__main__":

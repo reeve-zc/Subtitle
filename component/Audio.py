@@ -2,17 +2,8 @@ import librosa
 import numpy as np
 import pygame
 
+from utils.common import clamp
 from setting import *
-
-
-def clamp(min_value, max_value, value):
-    if value < min_value:
-        return min_value
-
-    if value > max_value:
-        return max_value
-
-    return value
 
 
 class AudioAnalyzer:
@@ -84,8 +75,9 @@ class AverageAudioBar(AudioBar):
 
         self.avg = 0
 
-    def update_all(self, dt, time, analyzer):
+    def update_all(self, dt, time, analyzer, color):
         self.avg = 0
+        self.color = color
 
         for i in self.rng:
             self.avg += analyzer.get_decibel(time, i)
@@ -136,11 +128,11 @@ class Audio:
                 w += BAR_WIDTH + SPACE
             self._bars.append(gr[0: 20])
 
-    def update_bars(self, screen, delta_time, pos):
+    def update_bars(self, screen, delta_time, pos, color=DEFAULT_COLOR):
 
         for b1 in self._bars:
             for b in b1:
-                b.update_all(delta_time, pos, self._analyzer)
+                b.update_all(delta_time, pos, self._analyzer, color)
         for b1 in self._bars:
             for b in b1:
                 b.render(screen)
