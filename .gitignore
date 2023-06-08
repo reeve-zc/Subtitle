@@ -1,5 +1,6 @@
 images/
 musics/
+venv/
 fonts/
 test.py
 .DS_Store

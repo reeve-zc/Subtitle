@@ -7,6 +7,40 @@ from component.Button import Button
 from component.Player import Player
 
 
+class Search:
+    def __init__(self):
+        self._btn_search = Button("search", (90, 90), (270, 120))
+        self._btn_close = Button("close", (65, 65), (935, 180))
+        self._surface = pygame.image.load(f"images/background/else/yellow_bg.png").convert_alpha()
+        self._surface = pygame.transform.scale(self._surface, (SEARCH_SURFACE_WIDTH, SEARCH_SURFACE_HEIGHT))
+        self._state = False
+        self._active = True
+
+    def search_pressed(self, pos):
+        if self._active:
+            self.search_btn_pressed(pos)
+            self.close_btn_pressed(pos)
+            return self._state
+
+    def search_btn_pressed(self, pos):
+        if self._btn_search.rect.collidepoint(pos):
+            self._state = True
+
+    def close_btn_pressed(self, pos):
+        if self._btn_close.rect.collidepoint(pos):
+            self._state = False
+
+    def show(self, screen: pygame.Surface):
+        screen.blit(self._btn_search.img, self._btn_search.rect)
+
+        if self._state:
+            bg_filter = screen.copy().convert_alpha()
+            bg_filter.fill((0, 0, 0, 50))
+            screen.blit(bg_filter, (0, 0))
+            screen.blit(self._surface, (SEARCH_SURFACE_X, SEARCH_SURFACE_Y))
+            screen.blit(self._btn_close.img, self._btn_close.rect)
+
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -14,6 +48,7 @@ class Game:
         pygame.display.set_caption('Subtitle')
         self.clock = pygame.time.Clock()
         self.player = Player()
+        self.search = Search()
         self.background = Background()
 
     def run(self):
@@ -44,24 +79,20 @@ class Game:
                     self.background.animation()
 
                 if event.type == self.player.song_name.fps_counter:
-                    self.player.song_name.show_name()
+                    self.player.song_name.animation()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.player.play_bar_pressed(event.pos)
-                    self.player.sound_bar_pressed(event.pos)
-                    self.player.play_btn_pressed(event.pos)
-                    self.player.reset_btn_pressed(event.pos)
-                    self.player.volume_btn_pressed(event.pos)
+                    self.player.player_pressed(event.pos)
+                    if self.search.search_pressed(event.pos):
+                        self.player._active = False
+                    else:
+                        self.player._active = True
 
                 if event.type == pygame.MOUSEBUTTONUP:
-                    self.player.play_btn_compressed()
-                    self.player.play_bar_compressed()
-                    self.player.sound_bar_compressed()
-                    self.player.reset_btn_compressed()
+                    self.player.player_compressed()
 
                 if event.type == pygame.MOUSEMOTION:
-                    self.player.play_bar_mov(event.pos)
-                    self.player.sound_bar_mov(event.pos)
+                    self.player.player_mov(event.pos)
 
             self.background.load_bg_img(self.screen)
 
@@ -69,7 +100,8 @@ class Game:
             self.screen.blit(btn_music.img, btn_music.rect)
             self.screen.blit(btn_next.img, btn_next.rect)
 
-            self.player.showing(self.screen, delta_time)
+            self.player.show(self.screen, delta_time)
+            self.search.show(self.screen)
 
             pygame.display.update()
             self.clock.tick(FPS)

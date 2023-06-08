@@ -128,7 +128,7 @@ class Audio:
                 w += BAR_WIDTH + SPACE
             self._bars.append(gr[0: 20])
 
-    def update_bars(self, screen, delta_time, pos, color=DEFAULT_COLOR):
+    def update_bars(self, screen: pygame.Surface, delta_time, pos, color=DEFAULT_COLOR):
 
         for b1 in self._bars:
             for b in b1:

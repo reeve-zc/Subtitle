@@ -13,10 +13,11 @@ def get_info(link):
     try:
         with YoutubeDL(option) as ydl:
             info_dict = ydl.extract_info(link, download=False)
-            video_url = info_dict.get("url", None)
-            video_id = info_dict.get("id", None)
+
             video_title = info_dict.get('title', None)
-            return info_dict
+            video_duration = info_dict.get('duration', None)
+            video_uploader = info_dict.get('uploader', None)
+            return video_title, video_duration, video_uploader
     except:
         return False
 
@@ -31,4 +32,5 @@ def download_song(link):
 
 if __name__ == "__main__":
     url = "https://youtu.be/TUVcZfQe-Kw"
+    get_info(url)
     download_song(url)

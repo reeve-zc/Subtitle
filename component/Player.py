@@ -6,7 +6,7 @@ from pydub import AudioSegment
 from component.Button import Button
 from component.Audio import Audio
 from setting import *
-from utils.common import clamp
+from utils.common import clamp, time_trans_m
 
 
 class Player:
@@ -20,6 +20,7 @@ class Player:
         self._last = False
         self._playing = False
         self._end = False
+        self._active = True
 
         self._song = None
 
@@ -34,16 +35,51 @@ class Player:
         self._btn_reset = Button("reset", (60, 60), (1070, 150))
 
     def change_song(self, filename):
-        self.reset()
+        self._reset()
         self._song = filename
         self._song_name.update_song(filename[7:])
         self._playback_bar._duration = AudioSegment.from_mp3(self._song).duration_seconds
-        self.set_volume()
+        self._set_volume()
 
-        self.start()
-        self.pause()
+        self._start()
+        self._pause()
 
-    def reset(self):
+    def player_pressed(self, pos):
+        if self._active:
+            self._play_bar_pressed(pos)
+            self._sound_bar_pressed(pos)
+            self._play_btn_pressed(pos)
+            self._reset_btn_pressed(pos)
+            self._volume_btn_pressed(pos)
+
+    def player_compressed(self):
+        self._play_btn_compressed()
+        self._play_bar_compressed()
+        self._sound_bar_compressed()
+        self._reset_btn_compressed()
+
+    def player_mov(self, pos):
+        self._play_bar_mov(pos)
+        self._sound_bar_mov(pos)
+
+    def show(self, screen: pygame.Surface, delta_time):
+        self._volume = self._sound_bar.get_pos()
+        self._set_volume()
+        self._audio.update_bars(screen, delta_time, self._get_time(delta_time))
+
+        if self._playing:
+            screen.blit(self._btn_pause.img, self._btn_pause.rect)
+            self._playback_bar.moving(self._get_time(delta_time))
+        else:
+            screen.blit(self._btn_play.img, self._btn_play.rect)
+
+        screen.blit(self._btn_reset.img, self._btn_reset.rect)
+
+        self._sound_bar.show(screen)
+        self._playback_bar.show(screen)
+        self._song_name.show(screen)
+
+    def _reset(self):
         self._playing_pos = 0
         self._song = None
         self._last = False
@@ -52,12 +88,12 @@ class Player:
         self._playback_bar.reset()
         self._song_name.reset()
 
-    def start(self):
+    def _start(self):
         self._audio.load(self._song)
         self._music.load(self._song)
         self._music.play(0)
 
-    def restart(self):
+    def _restart(self):
         if self._end:
             self._playing = True
 
@@ -67,82 +103,86 @@ class Player:
         self._playback_bar.set_pos((0, 0))
 
         if not self._playing:
-            self.pause()
+            self._pause()
 
-    def check_restart(self):
+    def _check_restart(self):
         if self._end:
-            self.restart()
+            self._restart()
 
-    def reverse_state(self):
+    def _reverse_state(self):
         self._playing = not self._playing
 
-    def volume_btn_pressed(self, pos):
+    def _volume_btn_pressed(self, pos):
         if self._sound_bar.btn_volume.rect.collidepoint(pos):
             self._sound_bar.reverse_state()
 
-    def play_btn_pressed(self, pos):
+    def _play_btn_pressed(self, pos):
         if self._btn_pause.rect.collidepoint(pos):
-            self.reverse_state()
-            self.check_restart()
+            self._btn_pause.state = True
 
-    def play_btn_compressed(self):
+    def _play_btn_compressed(self):
+        if self._btn_pause.state:
+            self._reverse_state()
+            self._check_restart()
+            self._btn_pause.state = False
+
         if self._playing:
-            self.unpause()
+            self._unpause()
         else:
-            self.pause()
+            self._pause()
 
-    def reset_btn_pressed(self, pos):
+    def _reset_btn_pressed(self, pos):
         if self._btn_reset.rect.collidepoint(pos):
             self._btn_reset.state = True
 
-    def reset_btn_compressed(self):
+    def _reset_btn_compressed(self):
         if self._btn_reset.state:
-            self.restart()
+            self._restart()
             self._btn_reset.state = False
 
-    def play_bar_pressed(self, pos):
+    def _play_bar_pressed(self, pos):
         if self._playback_bar.rect.collidepoint(pos) or self._playback_bar.line_rect.collidepoint(pos):
-            self.set_time(self._playback_bar.set_pos(pos))
-            self.last = self.playing
-            self.pause()
+            self._set_time(self._playback_bar.set_pos(pos))
+            self._last = self._playing
+            self._pause()
             self._playback_bar.state = True
 
-    def play_bar_compressed(self):
+    def _play_bar_compressed(self):
         if self._playback_bar.state:
             self._playback_bar.state = False
-            if self.last:
-                if not self.end:
-                    self.unpause()
+            if self._last:
+                if not self._end:
+                    self._unpause()
 
-    def play_bar_mov(self, pos):
+    def _play_bar_mov(self, pos):
         if self._playback_bar.state:
-            self.set_time(self._playback_bar.set_pos(pos))
+            self._set_time(self._playback_bar.set_pos(pos))
 
-    def sound_bar_pressed(self, pos):
+    def _sound_bar_pressed(self, pos):
         if self._sound_bar.rect.collidepoint(pos) or self._sound_bar.line_rect.collidepoint(pos):
             self._sound_bar.set_pos(pos)
             self._sound_bar.state = True
 
-    def sound_bar_compressed(self):
+    def _sound_bar_compressed(self):
         if self._sound_bar.state:
             self._sound_bar.state = False
 
-    def sound_bar_mov(self, pos):
+    def _sound_bar_mov(self, pos):
         if self._sound_bar.state:
             self._sound_bar.set_pos(pos)
 
-    def pause(self):
+    def _pause(self):
         self._music.pause()
         self._playing = False
 
-    def unpause(self):
+    def _unpause(self):
         self._music.unpause()
         self._playing = True
 
-    def stop(self):
+    def _stop(self):
         self._music.stop()
 
-    def set_time(self, time):
+    def _set_time(self, time):
         if self._end:
             self._playing_pos = 0
             self._music.play(0)
@@ -156,7 +196,7 @@ class Player:
         if not self._playing:
             self._music.pause()
 
-    def get_time(self, delta_time):
+    def _get_time(self, delta_time):
         time = (self._music.get_pos() - self._playing_pos) / 1000
 
         if time + delta_time >= self._playback_bar.duration:
@@ -167,47 +207,14 @@ class Player:
 
         return time
 
-    def get_volume(self):
+    def _get_volume(self):
         return self._music.get_volume()
 
-    def set_volume(self):
+    def _set_volume(self):
         self._music.set_volume(self._volume / 100)
 
-    def add_song(self, song):
+    def _add_song(self, song):
         self._music.queue(song)
-
-    def showing(self, screen, delta_time):
-        self._volume = self._sound_bar.get_pos()
-        self.set_volume()
-        screen.blit(self._song_name.surface, (X_START, Y_START + PLAYBACK_BAR_MARGIN_TOP + 40))
-        self._audio.update_bars(screen, delta_time, self.get_time(delta_time))
-
-        if self.playing:
-            screen.blit(self._btn_pause.img, self._btn_pause.rect)
-            self._playback_bar.moving(self.get_time(delta_time))
-        else:
-            screen.blit(self._btn_play.img, self._btn_play.rect)
-
-        screen.blit(self._btn_reset.img, self._btn_reset.rect)
-
-        self._sound_bar.show(screen)
-        self._playback_bar.show(screen)
-
-    @property
-    def playing(self):
-        return self._playing
-
-    @property
-    def last(self):
-        return self._last
-
-    @last.setter
-    def last(self, value):
-        self._last = value
-
-    @property
-    def end(self):
-        return self._end
 
     @property
     def song_name(self):
@@ -244,7 +251,7 @@ class SoundBar:
         else:
             self._rect.centerx = self._last
 
-    def show(self, screen):
+    def show(self, screen: pygame.Surface):
         cx, cy = self._rect.center
         if self._state:
             self._rect.size = BAR_CIRCLE_SIZE + 2, BAR_CIRCLE_SIZE + 2
@@ -253,9 +260,7 @@ class SoundBar:
 
         pygame.draw.line(screen, DEFAULT_COLOR, (SOUND_BAR_X_START, SOUND_BAR_Y), (SOUND_BAR_X_END, SOUND_BAR_Y),
                          width=LINE_WIDTH)
-        gray_line = pygame.Rect(cx, SOUND_BAR_Y - LINE_WIDTH // 2,
-                                SOUND_BAR_LENGTH - (cx - SOUND_BAR_X_START) + 1, LINE_WIDTH)
-        pygame.draw.rect(screen, DEFAULT_COLOR_GRAY, gray_line)
+        pygame.draw.line(screen, DEFAULT_COLOR_GRAY, (cx, SOUND_BAR_Y), (SOUND_BAR_X_END, SOUND_BAR_Y))
         self._rect.center = cx, cy
         pygame.draw.rect(screen, DEFAULT_COLOR, self._rect, border_radius=int(self._rect.h / 2))
 
@@ -314,17 +319,17 @@ class PlayBackBar:
         self._rect.centerx = mx
         return self.get_pos()
 
-    def show_time(self):
-        now = int(self.get_pos())
-        duration = int(self._duration)
-        time = "{:>d}:{:02d} / {:>d}:{:02d}".format(now // 60, now % 60, duration // 60, duration % 60)
+    def _show_time(self):
+        now = time_trans_m(int(self.get_pos()))
+        duration = time_trans_m(int(self._duration))
+        time = f"{now} / {duration}"
         time = self.font.render(time, True, DEFAULT_COLOR)
         surface = pygame.Surface((time.get_width(), time.get_height()), flags=pygame.HWSURFACE).convert_alpha()
         surface.fill((255, 255, 255, 0))
         surface.blit(time, (0, 0))
         return surface
 
-    def show(self, screen):
+    def show(self, screen: pygame.Surface):
         cx, cy = self._rect.center
         if self._state:
             self._rect.size = BAR_CIRCLE_SIZE + 2, BAR_CIRCLE_SIZE + 2
@@ -336,7 +341,7 @@ class PlayBackBar:
                          width=LINE_WIDTH + 2)
         self._rect.center = cx, cy
         pygame.draw.rect(screen, DEFAULT_COLOR, self._rect, border_radius=int(self._rect.h / 2))
-        screen.blit(self.show_time(), (X_START, Y_START + PLAYBACK_BAR_MARGIN_TOP / 2 - 11))
+        screen.blit(self._show_time(), (X_START, Y_START + PLAYBACK_BAR_MARGIN_TOP / 2 - 11))
 
     @property
     def rect(self):
@@ -361,13 +366,13 @@ class PlayBackBar:
 
 class SongName:
     def __init__(self, font_size=40):
-        self.font = pygame.font.Font(DEFAULT_FONT, font_size)
+        self.font = pygame.font.Font("fonts/AA桔梗少女V1.3.TTF", font_size)
         self.name = None
         self.surface = None
         self.x = 0
 
-        self.fps = 10
-        self.fps_counter = pygame.USEREVENT + 1
+        self._fps = 10
+        self._fps_counter = pygame.USEREVENT + 1
 
     def reset(self):
         self.name = None
@@ -378,11 +383,22 @@ class SongName:
         self.name = self.font.render("   " + song + "   ", True, DEFAULT_COLOR)
         self.surface = pygame.Surface((572, self.name.get_height()), flags=pygame.HWSURFACE).convert_alpha()
 
-    def show_name(self):
-        self.surface.fill((255, 255, 255, 0))
+    def animation(self):
         self.x -= 1
         if self.x < -self.name.get_width():
             self.x = 0
 
+    def show(self, screen: pygame.Surface):
+        self.surface.fill((255, 255, 255, 0))
+
         self.surface.blit(self.name, (self.x, 0))
         self.surface.blit(self.name, (self.x + self.name.get_width(), 0))
+        screen.blit(self.surface, (X_START, Y_START + PLAYBACK_BAR_MARGIN_TOP + 40))
+
+    @property
+    def fps(self):
+        return self._fps
+
+    @property
+    def fps_counter(self):
+        return self._fps_counter

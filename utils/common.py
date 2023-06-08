@@ -6,3 +6,7 @@ def clamp(min_value, max_value, value):
         return max_value
 
     return value
+
+
+def time_trans_m(second: int):
+    return "{:>d}:{:02d}".format(second // 60, second % 60)
