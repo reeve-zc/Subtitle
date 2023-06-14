@@ -3,10 +3,10 @@ import pygame.font
 import pygame.mixer
 from pydub import AudioSegment
 
+from component.Bar import SoundBar, PlayBackBar
 from component.Button import Button
 from component.Audio import Audio
 from setting import *
-from utils.common import clamp, time_trans_m
 
 
 class Player:
@@ -38,7 +38,7 @@ class Player:
         self._reset()
         self._song = filename
         self._song_name.update_song(filename[7:])
-        self._playback_bar._duration = AudioSegment.from_mp3(self._song).duration_seconds
+        self._playback_bar.duration = AudioSegment.from_mp3(self._song).duration_seconds
         self._set_volume()
 
         self._start()
@@ -68,12 +68,12 @@ class Player:
         self._audio.update_bars(screen, delta_time, self._get_time(delta_time))
 
         if self._playing:
-            screen.blit(self._btn_pause.img, self._btn_pause.rect)
+            self._btn_pause.show(screen)
             self._playback_bar.moving(self._get_time(delta_time))
         else:
-            screen.blit(self._btn_play.img, self._btn_play.rect)
+            self._btn_play.show(screen)
 
-        screen.blit(self._btn_reset.img, self._btn_reset.rect)
+        self._btn_reset.show(screen)
 
         self._sound_bar.show(screen)
         self._playback_bar.show(screen)
@@ -200,7 +200,6 @@ class Player:
         time = (self._music.get_pos() - self._playing_pos) / 1000
 
         if time + delta_time >= self._playback_bar.duration:
-            print("The end")
             time = self._playback_bar.duration
             self._end = True
             self._playing = False
@@ -219,149 +218,6 @@ class Player:
     @property
     def song_name(self):
         return self._song_name
-
-
-class SoundBar:
-    def __init__(self):
-        self._rect = pygame.Rect(SOUND_BAR_X_START + SOUND_BAR_LENGTH / 2 - BAR_CIRCLE_RADIUS / 2,
-                                 SOUND_BAR_Y - BAR_CIRCLE_RADIUS, BAR_CIRCLE_SIZE, BAR_CIRCLE_SIZE)
-        self._line_rect = pygame.Rect(SOUND_BAR_X_START - BAR_CIRCLE_RADIUS, SOUND_BAR_Y - BAR_CIRCLE_RADIUS - 10,
-                                      SOUND_BAR_LENGTH + BAR_CIRCLE_SIZE, BAR_CIRCLE_SIZE + 20)
-
-        self._btn_volume = Button("volume", (50, 50), (SOUND_BAR_X_START - 26, SOUND_BAR_Y))
-        self._btn_mute = Button("mute", (50, 50), (SOUND_BAR_X_START - 26, SOUND_BAR_Y))
-        self._last = 0
-        self._mute = False
-        self._state = False
-
-    def get_pos(self):
-        delta_x = self._rect.centerx - SOUND_BAR_X_START
-        return delta_x / (SOUND_BAR_LENGTH / 100)
-
-    def set_pos(self, pos):
-        mx = clamp(SOUND_BAR_X_START, SOUND_BAR_X_END, pos[0])
-        self._rect.centerx = mx
-        self._mute = True if mx == SOUND_BAR_X_START else False
-
-    def reverse_state(self):
-        self._mute = not self._mute
-        if self._mute:
-            self._last = self._rect.centerx
-            self._rect.centerx = SOUND_BAR_X_START
-        else:
-            self._rect.centerx = self._last
-
-    def show(self, screen: pygame.Surface):
-        cx, cy = self._rect.center
-        if self._state:
-            self._rect.size = BAR_CIRCLE_SIZE + 2, BAR_CIRCLE_SIZE + 2
-        else:
-            self._rect.size = BAR_CIRCLE_SIZE, BAR_CIRCLE_SIZE
-
-        pygame.draw.line(screen, DEFAULT_COLOR, (SOUND_BAR_X_START, SOUND_BAR_Y), (SOUND_BAR_X_END, SOUND_BAR_Y),
-                         width=LINE_WIDTH)
-        pygame.draw.line(screen, DEFAULT_COLOR_GRAY, (cx, SOUND_BAR_Y), (SOUND_BAR_X_END, SOUND_BAR_Y))
-        self._rect.center = cx, cy
-        pygame.draw.rect(screen, DEFAULT_COLOR, self._rect, border_radius=int(self._rect.h / 2))
-
-        if self._mute:
-            screen.blit(self._btn_mute.img, self._btn_mute.rect)
-        else:
-            screen.blit(self._btn_volume.img, self._btn_volume.rect)
-
-    @property
-    def rect(self):
-        return self._rect
-
-    @property
-    def line_rect(self):
-        return self._line_rect
-
-    @property
-    def state(self):
-        return self._state
-
-    @state.setter
-    def state(self, value):
-        self._state = value
-
-    @property
-    def btn_volume(self):
-        return self._btn_volume
-
-
-class PlayBackBar:
-    def __init__(self):
-        self.font = pygame.font.Font("fonts/Arial.ttf", 19)
-        self._rect = pygame.Rect(X_START - BAR_CIRCLE_RADIUS, PLAYBACK_BAR_Y - BAR_CIRCLE_RADIUS,
-                                 BAR_CIRCLE_SIZE, BAR_CIRCLE_SIZE)
-        self._line_rect = pygame.Rect(X_START - BAR_CIRCLE_RADIUS, PLAYBACK_BAR_Y - BAR_CIRCLE_RADIUS - 10,
-                                      LENGTH + BAR_CIRCLE_SIZE, BAR_CIRCLE_SIZE + 20)
-        self._duration = 0
-        self._state = False
-
-    def reset(self):
-        self._duration = 0
-        self._state = False
-        self._rect = pygame.Rect(X_START - BAR_CIRCLE_RADIUS, PLAYBACK_BAR_Y - BAR_CIRCLE_RADIUS,
-                                 BAR_CIRCLE_SIZE, BAR_CIRCLE_SIZE)
-
-    def get_pos(self):
-        delta_x = self._rect.centerx - X_START
-        return delta_x / (LENGTH / self._duration)
-
-    def moving(self, time):
-        delta_x = time * (LENGTH / self._duration)
-        self._rect.centerx = X_START + delta_x
-
-    def set_pos(self, pos):
-        mx = clamp(X_START, X_END, pos[0])
-        self._rect.centerx = mx
-        return self.get_pos()
-
-    def _show_time(self):
-        now = time_trans_m(int(self.get_pos()))
-        duration = time_trans_m(int(self._duration))
-        time = f"{now} / {duration}"
-        time = self.font.render(time, True, DEFAULT_COLOR)
-        surface = pygame.Surface((time.get_width(), time.get_height()), flags=pygame.HWSURFACE).convert_alpha()
-        surface.fill((255, 255, 255, 0))
-        surface.blit(time, (0, 0))
-        return surface
-
-    def show(self, screen: pygame.Surface):
-        cx, cy = self._rect.center
-        if self._state:
-            self._rect.size = BAR_CIRCLE_SIZE + 2, BAR_CIRCLE_SIZE + 2
-        else:
-            self._rect.size = BAR_CIRCLE_SIZE, BAR_CIRCLE_SIZE
-
-        pygame.draw.line(screen, DEFAULT_COLOR, (X_START, PLAYBACK_BAR_Y), (X_END, PLAYBACK_BAR_Y), width=LINE_WIDTH)
-        pygame.draw.line(screen, DEFAULT_COLOR, (X_START, PLAYBACK_BAR_Y), (self._rect.centerx, PLAYBACK_BAR_Y),
-                         width=LINE_WIDTH + 2)
-        self._rect.center = cx, cy
-        pygame.draw.rect(screen, DEFAULT_COLOR, self._rect, border_radius=int(self._rect.h / 2))
-        screen.blit(self._show_time(), (X_START, Y_START + PLAYBACK_BAR_MARGIN_TOP / 2 - 11))
-
-    @property
-    def rect(self):
-        return self._rect
-
-    @property
-    def state(self):
-        return self._state
-
-    @state.setter
-    def state(self, value):
-        self._state = value
-
-    @property
-    def duration(self):
-        return self._duration
-
-    @property
-    def line_rect(self):
-        return self._line_rect
 
 
 class SongName:

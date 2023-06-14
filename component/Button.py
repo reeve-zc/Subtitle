@@ -8,3 +8,6 @@ class Button:
         self.img = pygame.transform.scale(self.img, size)
         self.rect = self.img.get_rect(center=pos)
         self.state = False
+
+    def show(self, screen: pygame.Surface):
+        screen.blit(self.img, self.rect)

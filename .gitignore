@@ -2,6 +2,7 @@ images/
 musics/
 venv/
 fonts/
+temp/
 test.py
 .DS_Store
 .idea/
