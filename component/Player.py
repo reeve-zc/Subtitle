@@ -48,15 +48,16 @@ class Player:
         if self._active:
             self._play_bar_pressed(pos)
             self._sound_bar_pressed(pos)
-            self._play_btn_pressed(pos)
-            self._reset_btn_pressed(pos)
-            self._volume_btn_pressed(pos)
+            self._btn_pause.pressed(pos)
+            self._btn_reset.pressed(pos)
+            self._sound_bar.btn_volume.pressed(pos)
 
     def player_compressed(self):
         self._play_btn_compressed()
         self._play_bar_compressed()
         self._sound_bar_compressed()
         self._reset_btn_compressed()
+        self._volume_btn_compressed()
 
     def player_mov(self, pos):
         self._play_bar_mov(pos)
@@ -112,13 +113,10 @@ class Player:
     def _reverse_state(self):
         self._playing = not self._playing
 
-    def _volume_btn_pressed(self, pos):
-        if self._sound_bar.btn_volume.rect.collidepoint(pos):
+    def _volume_btn_compressed(self):
+        if self._sound_bar.btn_volume.state:
             self._sound_bar.reverse_state()
-
-    def _play_btn_pressed(self, pos):
-        if self._btn_pause.rect.collidepoint(pos):
-            self._btn_pause.state = True
+            self._sound_bar.btn_volume.state = False
 
     def _play_btn_compressed(self):
         if self._btn_pause.state:
@@ -130,10 +128,6 @@ class Player:
             self._unpause()
         else:
             self._pause()
-
-    def _reset_btn_pressed(self, pos):
-        if self._btn_reset.rect.collidepoint(pos):
-            self._btn_reset.state = True
 
     def _reset_btn_compressed(self):
         if self._btn_reset.state:
@@ -249,7 +243,7 @@ class SongName:
 
         self.surface.blit(self.name, (self.x, 0))
         self.surface.blit(self.name, (self.x + self.name.get_width(), 0))
-        screen.blit(self.surface, (X_START, Y_START + PLAYBACK_BAR_MARGIN_TOP + 40))
+        screen.blit(self.surface, (X_START, SONG_NAME_Y))
 
     @property
     def fps(self):

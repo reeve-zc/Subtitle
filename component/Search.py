@@ -3,7 +3,7 @@ import shutil
 import pygame
 
 from component.Button import Button
-from component.Input import SearchInput
+from component.Input import CardInput
 from component.Text import Text
 from setting import *
 from utils.get_audio import get_info, download_song
@@ -14,7 +14,7 @@ class Search:
         self._btn_search = Button("search", (90, 90), (270, 120))
         self._btn_close = Button("close", (65, 65), (958, 205))
         self._btn_mp3_download = Button("button", (635, 95), (WIDTH / 2 + 3, 520))
-        self._input = SearchInput((SEARCH_BAR_WIDTH, SEARCH_BAR_HEIGHT), SEARCH_BAR_CENTER, 420, length=40)
+        self._input = CardInput('searchbar', (SEARCH_BAR_WIDTH, SEARCH_BAR_HEIGHT), SEARCH_BAR_CENTER, 420, length=40)
 
         self._bg = pygame.image.load(f"images/background/else/yellow_bg.png").convert_alpha()
         self._bg = pygame.transform.scale(self._bg, (SEARCH_SURFACE_WIDTH, SEARCH_SURFACE_HEIGHT))
@@ -53,7 +53,7 @@ class Search:
     def search_bar_key_down(self, event: pygame.event):
         if self._input.state:
             if event.key == pygame.K_RETURN:
-                if os.path.isdir("temp/"):
+                if os.pgath.isdir("temp/"):
                     shutil.rmtree("temp/")
                 self._result = get_info(self._input.word)
             elif event.key == pygame.K_BACKSPACE:
@@ -89,7 +89,7 @@ class Search:
 
     def show_result(self, screen):
         if self._result and self._result == "Download Failed":
-            text = Text("Not Found", 45, CENTER)
+            text = Text("字体管家方萌.TTF", "Not Found", 45, CENTER)
             text.show(screen)
         elif self._result:
             img_name = list(filter(lambda x: 'jpg' in x, os.listdir("temp/")))[0]
@@ -128,7 +128,7 @@ class Search:
                 x += word_width
 
         else:
-            text = Text("Not Found", 45, CENTER)
+            text = Text("字体管家方萌.TTF", "Not Found", 45, CENTER)
             text.show(screen)
 
     def show(self, screen: pygame.Surface):
@@ -145,3 +145,7 @@ class Search:
 
             if self._result:
                 self.show_download_btn(screen)
+
+    @property
+    def input(self):
+        return self._input

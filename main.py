@@ -7,6 +7,8 @@ from component.Background import Background
 from component.Button import Button
 from component.Player import Player
 from component.Search import Search
+from component.CardView import TodoCardView
+from component.Card import Card
 
 
 class Game:
@@ -21,14 +23,16 @@ class Game:
         self.player = Player()
         self.search = Search()
         self.background = Background()
+        self.todo_list = TodoCardView()
 
     def run(self):
-        btn_music_list = Button("musiclist", (80, 80), (120, 120))
-        btn_music = Button("music", (80, 80), (190, 120))
+        btn_music = Button("setting", (82, 82), (120, 120))
+        btn_music_list = Button("musiclist", (80, 80), (190, 120))
         btn_next = Button("next", (60, 60), (1130, 150))
 
         pygame.time.set_timer(pygame.USEREVENT, self.background.fps)
         pygame.time.set_timer(pygame.USEREVENT + 1, self.player.song_name.fps)
+        pygame.time.set_timer(pygame.USEREVENT + 3, self.search.input.fps)
 
         t = pygame.time.get_ticks()
         get_ticks_last_frame = t
@@ -52,6 +56,9 @@ class Game:
                 if event.type == self.player.song_name.fps_counter:
                     self.player.song_name.animation()
 
+                if event.type == self.search.input.fps_counter:
+                    self.search.input.animation()
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.player.player_pressed(event.pos)
                     if self.search.search_pressed(event.pos):
@@ -64,7 +71,7 @@ class Game:
                     self.search.search_compressed()
 
                 if event.type == pygame.MOUSEMOTION:
-                    # print(event.pos)
+                    print(event.pos)
                     self.player.player_mov(event.pos)
 
                 if event.type == pygame.KEYDOWN:
@@ -77,7 +84,9 @@ class Game:
             btn_next.show(self.screen)
 
             self.player.show(self.screen, delta_time)
+            self.todo_list.show(self.screen)
             self.search.show(self.screen)
+            # self.card.show(self.screen)
 
             pygame.display.update()
             self.clock.tick(FPS)

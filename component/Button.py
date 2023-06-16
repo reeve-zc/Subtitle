@@ -11,3 +11,9 @@ class Button:
 
     def show(self, screen: pygame.Surface):
         screen.blit(self.img, self.rect)
+
+    def pressed(self, pos):
+        if self.rect.collidepoint(pos):
+            self.state = True
+        else:
+            self.state = False
