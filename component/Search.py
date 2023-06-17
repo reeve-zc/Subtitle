@@ -1,6 +1,7 @@
 import os
 import shutil
 import pygame
+import pyperclip
 
 from component.Button import Button
 from component.Input import CardInput
@@ -53,13 +54,13 @@ class Search:
     def search_bar_key_down(self, event: pygame.event):
         if self._input.state:
             if event.key == pygame.K_RETURN:
-                if os.pgath.isdir("temp/"):
+                if os.path.isdir("temp/"):
                     shutil.rmtree("temp/")
                 self._result = get_info(self._input.word)
             elif event.key == pygame.K_BACKSPACE:
                 self._input.delete()
             elif (event.key == pygame.K_v) and (event.mod & pygame.KMOD_CTRL):
-                self._input.update(pygame.scrap.get("text/plain;charset=utf-8").decode())
+                self._input.update(pyperclip.paste())
             else:
                 self._input.add(event.unicode)
 
