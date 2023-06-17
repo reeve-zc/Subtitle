@@ -4,7 +4,7 @@ import pygame
 import pyperclip
 
 from component.Button import Button
-from component.Input import CardInput
+from component.Input import SearchInput
 from component.Text import Text
 from setting import *
 from utils.get_audio import get_info, download_song
@@ -15,7 +15,7 @@ class Search:
         self._btn_search = Button("search", (90, 90), (270, 120))
         self._btn_close = Button("close", (65, 65), (958, 205))
         self._btn_mp3_download = Button("button", (635, 95), (WIDTH / 2 + 3, 520))
-        self._input = CardInput('searchbar', (SEARCH_BAR_WIDTH, SEARCH_BAR_HEIGHT), SEARCH_BAR_CENTER, 420, length=40)
+        self._input = SearchInput('searchbar', (SEARCH_BAR_WIDTH, SEARCH_BAR_HEIGHT), SEARCH_BAR_CENTER, 420, length=40)
 
         self._bg = pygame.image.load(f"images/background/else/yellow_bg.png").convert_alpha()
         self._bg = pygame.transform.scale(self._bg, (SEARCH_SURFACE_WIDTH, SEARCH_SURFACE_HEIGHT))

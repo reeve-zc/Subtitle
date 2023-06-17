@@ -4,3 +4,4 @@ pygame
 yt_dlp
 ffmpeg
 pydub
+pyperclip

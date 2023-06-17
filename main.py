@@ -9,7 +9,6 @@ from component.Player import Player
 from component.Search import Search
 from component.CardView import TodoCardView
 from component.PlayList import PlayList
-from component.Card import Card
 
 
 class Game:
@@ -31,6 +30,7 @@ class Game:
         pygame.time.set_timer(pygame.USEREVENT, self.background.fps)
         pygame.time.set_timer(pygame.USEREVENT + 1, self.player.song_name.fps)
         pygame.time.set_timer(pygame.USEREVENT + 3, self.search.input.fps)
+        pygame.time.set_timer(pygame.USEREVENT + 3, self.todo_list.fps)
 
         t = pygame.time.get_ticks()
         get_ticks_last_frame = t
@@ -57,38 +57,45 @@ class Game:
                 if event.type == self.search.input.fps_counter:
                     self.search.input.animation()
 
+                if event.type == self.todo_list.fps_counter:
+                    self.todo_list.animation()
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.player.player_pressed(event.pos)
                     self.playlist.playlist_pressed(event.pos)
+                    self.todo_list.todo_list_pressed(event.pos)
+
                     if self.search.search_pressed(event.pos):
                         self.player._active = False
+                        self.todo_list._active = False
                     else:
                         self.player._active = True
+                        self.todo_list._active = True
 
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.player.player_compressed()
                     self.search.search_compressed()
                     self.playlist.playlist_compressed()
+                    self.todo_list.todo_list_compressed()
 
                 if event.type == pygame.MOUSEMOTION:
-                    print(event.pos)
+                    # print(event.pos)
                     self.player.player_mov(event.pos)
 
                 if event.type == pygame.KEYDOWN:
+                    self.todo_list.todo_list_key_down(event)
                     self.search.search_bar_key_down(event)
 
             self.background.load_bg_img(self.screen)
-
 
             btn_music.show(self.screen)
             btn_next.show(self.screen)
 
             self.player.show(self.screen, delta_time)
             self.todo_list.show(self.screen)
-            self.search.show(self.screen)
             self.playlist.show(self.screen)
-            # self.card.show(self.screen)
+            self.search.show(self.screen)
 
             pygame.display.update()
             self.clock.tick(FPS)
