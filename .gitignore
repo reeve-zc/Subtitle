@@ -1,7 +1,8 @@
 images/
 musics/
-venv/
 fonts/
+storage/
+venv/
 temp/
 test.py
 .DS_Store

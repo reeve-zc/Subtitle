@@ -21,7 +21,7 @@ class Game:
         self.search = Search()
         self.playlist = PlayList()
         self.background = Background()
-        self.todo_list = TodoCardView()
+        self.todolist = TodoCardView()
 
     def run(self):
         btn_music = Button("setting", (82, 82), (120, 120))
@@ -30,7 +30,7 @@ class Game:
         pygame.time.set_timer(pygame.USEREVENT, self.background.fps)
         pygame.time.set_timer(pygame.USEREVENT + 1, self.player.song_name.fps)
         pygame.time.set_timer(pygame.USEREVENT + 3, self.search.input.fps)
-        pygame.time.set_timer(pygame.USEREVENT + 3, self.todo_list.fps)
+        pygame.time.set_timer(pygame.USEREVENT + 3, self.todolist.fps)
 
         t = pygame.time.get_ticks()
         get_ticks_last_frame = t
@@ -45,6 +45,7 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    self.todolist.store_cards()
                     pygame.quit()
                     sys.exit()
 
@@ -57,30 +58,30 @@ class Game:
                 if event.type == self.search.input.fps_counter:
                     self.search.input.animation()
 
-                if event.type == self.todo_list.fps_counter:
-                    self.todo_list.animation()
+                if event.type == self.todolist.fps_counter:
+                    self.todolist.animation()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.player.pressed(event.pos)
                     self.playlist.pressed(event.pos)
-                    self.todo_list.pressed(event.pos)
+                    self.todolist.pressed(event.pos)
                     self.search.pressed(event.pos)
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.player.compressed()
-                    self.todo_list.compressed()
+                    self.todolist.compressed()
 
                     if self.search.compressed():
                         self.player._active = False
-                        self.todo_list._active = False
+                        self.todolist._active = False
                         self.playlist._active = False
                     elif self.playlist.compressed():
                         self.player._active = False
-                        self.todo_list._active = False
+                        self.todolist._active = False
                         self.search._active = False
                     else:
                         self.player._active = True
-                        self.todo_list._active = True
+                        self.todolist._active = True
                         self.search._active = True
                         self.playlist._active = True
 
@@ -89,7 +90,7 @@ class Game:
                     self.player.player_mov(event.pos)
 
                 if event.type == pygame.KEYDOWN:
-                    self.todo_list.todo_list_key_down(event)
+                    self.todolist.todo_list_key_down(event)
                     self.search.search_bar_key_down(event)
 
             self.background.load_bg_img(self.screen)
@@ -98,7 +99,7 @@ class Game:
             btn_next.show(self.screen)
 
             self.player.show(self.screen, delta_time)
-            self.todo_list.show(self.screen)
+            self.todolist.show(self.screen)
 
             self.search.btn_search.show(self.screen)
             self.playlist.btn_playlist.show(self.screen)

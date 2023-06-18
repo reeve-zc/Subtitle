@@ -1,3 +1,5 @@
+import os
+
 import pygame
 
 from setting import *
@@ -55,6 +57,20 @@ class TodoCardView(CardView):
         self.fps = 450
         self.fps_counter = pygame.USEREVENT + 3
 
+        self.cards_initial()
+
+    def cards_initial(self):
+        path = "storage/cards.txt"
+        if os.path.isfile(path):
+            with open(path, 'r') as f:
+                texts = f.read().split(",")
+                if texts == ['']:
+                    return
+                for index in range(len(texts)):
+                    self.add_card()
+                    print("hello")
+                    self.cards[index].input.word = texts[index]
+
     def animation(self):
         index = self.get_selected_card()
         if index is not None:
@@ -64,6 +80,13 @@ class TodoCardView(CardView):
         self.cards.append(TodoCard(self.card_size, (0, 0), self.card_size[1] // 3))
         if len(self.cards) > self.nums:
             self.top_index += 1
+
+    def store_cards(self):
+        texts = ""
+        for card in self.cards:
+            texts += card.get_text() + ','
+        with open('storage/cards.txt', 'w') as f:
+            f.write(texts[:-1])
 
     def pressed(self, pos):
         if self._active:

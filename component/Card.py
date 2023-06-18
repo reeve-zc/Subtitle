@@ -44,6 +44,9 @@ class TodoCard(Card):
     def modify(self):
         self.input.state = True
 
+    def get_text(self):
+        return self.input.word
+
     def pressed(self, pos):
         super().pressed(pos)
         if not self.state:
