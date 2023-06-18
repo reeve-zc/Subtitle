@@ -65,7 +65,7 @@ class TodoCardView(CardView):
         if len(self.cards) > self.nums:
             self.top_index += 1
 
-    def todo_list_pressed(self, pos):
+    def pressed(self, pos):
         if self._active:
             self._btn_edit.pressed(pos)
             self._btn_add.pressed(pos)
@@ -78,7 +78,7 @@ class TodoCardView(CardView):
             for card in cards:
                 card.pressed(pos)
 
-    def todo_list_compressed(self):
+    def compressed(self):
         self._add_btn_compressed()
         self._edit_btn_compressed()
         self._delete_btn_compressed()

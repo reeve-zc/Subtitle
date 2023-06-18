@@ -6,6 +6,7 @@ import pyperclip
 from component.Button import Button
 from component.Input import SearchInput
 from component.Text import Text
+from component.FloatingInterface import FloatingInterface
 from setting import *
 from utils.get_audio import get_info, download_song
 
@@ -13,12 +14,9 @@ from utils.get_audio import get_info, download_song
 class Search:
     def __init__(self):
         self._btn_search = Button("search", (90, 90), (270, 120))
-        self._btn_close = Button("close", (65, 65), (958, 205))
         self._btn_mp3_download = Button("button", (635, 95), (WIDTH / 2 + 3, 520))
         self._input = SearchInput('searchbar', (SEARCH_BAR_WIDTH, SEARCH_BAR_HEIGHT), SEARCH_BAR_CENTER, 420, length=40)
-
-        self._bg = pygame.image.load(f"images/background/else/yellow_bg.png").convert_alpha()
-        self._bg = pygame.transform.scale(self._bg, (SEARCH_SURFACE_WIDTH, SEARCH_SURFACE_HEIGHT))
+        self._floating_interface = FloatingInterface((SEARCH_SURFACE_WIDTH, SEARCH_SURFACE_HEIGHT))
 
         self._font = {18: pygame.font.Font("fonts/字体管家方萌.TTF", 18),
                       20: pygame.font.Font("fonts/字体管家方萌.TTF", 20),
@@ -64,24 +62,28 @@ class Search:
             else:
                 self._input.add(event.unicode)
 
-    def search_pressed(self, pos):
+    def pressed(self, pos):
         if self._active:
-            self.search_btn_pressed(pos)
-            self.close_btn_pressed(pos)
+            self._btn_search.pressed(pos)
+            self._floating_interface.btn_close.pressed(pos)
             self.search_bar_pressed(pos)
             self.mp3_download_btn_pressed(pos)
-            return self._state
 
-    def search_compressed(self):
+    def compressed(self):
         self.mp3_download_btn_compressed()
+        self.search_btn_compressed()
+        self.close_btn_compressed()
+        return self._state
 
-    def search_btn_pressed(self, pos):
-        if self._btn_search.rect.collidepoint(pos):
+    def search_btn_compressed(self):
+        if self._btn_search.state:
+            self._btn_search.state = False
             self._state = True
             self._input.reset()
 
-    def close_btn_pressed(self, pos):
-        if self._btn_close.rect.collidepoint(pos):
+    def close_btn_compressed(self):
+        if self._floating_interface.btn_close.state:
+            self._floating_interface.btn_close.state = False
             self._result = None
             self._state = False
 
@@ -133,14 +135,8 @@ class Search:
             text.show(screen)
 
     def show(self, screen: pygame.Surface):
-        self._btn_search.show(screen)
-
         if self._state:
-            bg_filter = screen.copy().convert_alpha()
-            bg_filter.fill((0, 0, 0, 50))
-            screen.blit(bg_filter, (0, 0))
-            screen.blit(self._bg, (SEARCH_SURFACE_X, SEARCH_SURFACE_Y))
-            self._btn_close.show(screen)
+            self._floating_interface.show(screen)
             self._input.show(screen)
             self.show_result(screen)
 
@@ -150,3 +146,7 @@ class Search:
     @property
     def input(self):
         return self._input
+
+    @property
+    def btn_search(self):
+        return self._btn_search

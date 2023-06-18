@@ -5,30 +5,37 @@ from component.Button import Button
 from component.FloatingInterface import FloatingInterface
 
 
-class PlayList():
+class PlayList:
     def __init__(self):
         self._state = False
         self._btn_playlist = Button("playlist", (80, 80), (190, 120))
-        self._floatinginterface = FloatingInterface(1600,1000)
+        self._floating_interface = FloatingInterface((1600, 1000))
+        self._active = True
 
-    def playlist_pressed(self, pos):
-        self._btn_playlist.pressed(pos)
-        self.close_btn_pressed(pos)
+    def pressed(self, pos):
+        if self._active:
+            self._btn_playlist.pressed(pos)
+            self._floating_interface.btn_close.pressed(pos)
 
-    def playlist_compressed(self):
+    def compressed(self):
+        self.playlist_btn_compressed()
+        self.close_btn_compressed()
+        return self._state
+
+    def playlist_btn_compressed(self):
         if self._btn_playlist.state:
-            self._state = True
             self._btn_playlist.state = False
+            self._state = True
 
-    def close_btn_pressed(self, pos):
-        if self._floatinginterface._btn_close.rect.collidepoint(pos):
+    def close_btn_compressed(self):
+        if self._floating_interface.btn_close.state:
+            self._floating_interface.btn_close.state = False
             self._state = False
 
-
-
-
     def show(self, screen: pygame.Surface):
-        self._btn_playlist.show(screen)
         if self._state:
-            self._floatinginterface.show(screen)
-        None
+            self._floating_interface.show(screen)
+
+    @property
+    def btn_playlist(self):
+        return self._btn_playlist

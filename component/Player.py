@@ -45,7 +45,7 @@ class Player:
         self._start()
         self._pause()
 
-    def player_pressed(self, pos):
+    def pressed(self, pos):
         if self._active:
             self._play_bar_pressed(pos)
             self._sound_bar_pressed(pos)
@@ -53,7 +53,7 @@ class Player:
             self._btn_reset.pressed(pos)
             self._sound_bar.btn_volume.pressed(pos)
 
-    def player_compressed(self):
+    def compressed(self):
         self._play_btn_compressed()
         self._play_bar_compressed()
         self._sound_bar_compressed()

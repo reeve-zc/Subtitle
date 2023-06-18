@@ -1,4 +1,5 @@
 import pygame
+import pyperclip
 
 from setting import *
 from component.Input import CardInput
@@ -35,10 +36,10 @@ class Card:
 
 
 class TodoCard(Card):
-    def __init__(self, size, pos, font_size, font='字体管家方萌.TTF', padding=20):
+    def __init__(self, size, pos, font_size, font='Andale Mono.ttf', padding=20):
         super().__init__(size, pos, padding)
         pos = pos[0], pos[1] + size[1] / 2
-        self.input = CardInput(font, pos, 7, font_size, length=15)
+        self.input = CardInput(font, pos, 10, font_size, length=15)
 
     def modify(self):
         self.input.state = True
@@ -47,6 +48,7 @@ class TodoCard(Card):
         super().pressed(pos)
         if not self.state:
             self.input.state = False
+            self.input.enter()
 
     def compressed(self):
         super().compressed()

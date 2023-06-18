@@ -61,23 +61,28 @@ class Game:
                     self.todo_list.animation()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.player.player_pressed(event.pos)
-                    self.playlist.playlist_pressed(event.pos)
-                    self.todo_list.todo_list_pressed(event.pos)
+                    self.player.pressed(event.pos)
+                    self.playlist.pressed(event.pos)
+                    self.todo_list.pressed(event.pos)
+                    self.search.pressed(event.pos)
 
-                    if self.search.search_pressed(event.pos):
+                if event.type == pygame.MOUSEBUTTONUP:
+                    self.player.compressed()
+                    self.todo_list.compressed()
+
+                    if self.search.compressed():
                         self.player._active = False
                         self.todo_list._active = False
+                        self.playlist._active = False
+                    elif self.playlist.compressed():
+                        self.player._active = False
+                        self.todo_list._active = False
+                        self.search._active = False
                     else:
                         self.player._active = True
                         self.todo_list._active = True
-
-
-                if event.type == pygame.MOUSEBUTTONUP:
-                    self.player.player_compressed()
-                    self.search.search_compressed()
-                    self.playlist.playlist_compressed()
-                    self.todo_list.todo_list_compressed()
+                        self.search._active = True
+                        self.playlist._active = True
 
                 if event.type == pygame.MOUSEMOTION:
                     # print(event.pos)
@@ -94,6 +99,9 @@ class Game:
 
             self.player.show(self.screen, delta_time)
             self.todo_list.show(self.screen)
+
+            self.search.btn_search.show(self.screen)
+            self.playlist.btn_playlist.show(self.screen)
             self.playlist.show(self.screen)
             self.search.show(self.screen)
 
