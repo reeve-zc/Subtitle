@@ -9,11 +9,13 @@ from component.Player import Player
 from component.Search import Search
 from component.CardView import TodoCardView
 from component.PlayList import PlayList
+from component.Timer import Timer
 
 
 class Game:
     def __init__(self):
         pygame.init()
+
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('Subtitle')
         self.clock = pygame.time.Clock()
@@ -22,12 +24,15 @@ class Game:
         self.playlist = PlayList()
         self.background = Background()
         self.todolist = TodoCardView()
+        self.timer = Timer()
 
     def run(self):
-        btn_music = Button("setting", (82, 82), (120, 120))
+        btn_setting = Button("setting", (82, 82), (120, 120))
+        btn_skull_nor = Button("skull_count", (300, 61.391), (240, 698))
 
         pygame.time.set_timer(pygame.USEREVENT, self.background.fps)
         pygame.time.set_timer(pygame.USEREVENT + 1, self.player.song_name.fps)
+        pygame.time.set_timer(pygame.USEREVENT + 2, self.timer.fps)
         pygame.time.set_timer(pygame.USEREVENT + 3, self.search.input.fps)
         pygame.time.set_timer(pygame.USEREVENT + 3, self.todolist.fps)
 
@@ -53,6 +58,10 @@ class Game:
                 if event.type == self.player.song_name.fps_counter:
                     self.player.song_name.animation()
 
+                if event.type == self.timer.fps_counter:
+                    if self.timer.counting:
+                        self.timer.animation()
+
                 if event.type == self.search.input.fps_counter:
                     self.search.input.animation()
 
@@ -61,6 +70,7 @@ class Game:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.player.pressed(event.pos)
+                    self.timer.pressed(event.pos)
                     self.playlist.pressed(event.pos)
                     self.todolist.pressed(event.pos)
                     self.search.pressed(event.pos)
@@ -68,6 +78,7 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.player.compressed()
                     self.todolist.compressed()
+                    self.timer.compressed()
                     state, song = self.playlist.compressed()
 
                     if self.search.compressed():
@@ -98,8 +109,10 @@ class Game:
 
             self.background.load_bg_img(self.screen)
 
-            btn_music.show(self.screen)
+            btn_setting.show(self.screen)
+            btn_skull_nor.show(self.screen)
 
+            self.timer.show(self.screen)
             self.player.show(self.screen, delta_time)
             self.todolist.show(self.screen)
 
@@ -107,7 +120,6 @@ class Game:
             self.playlist.btn_playlist.show(self.screen)
             self.playlist.show(self.screen)
             self.search.show(self.screen)
-
             pygame.display.update()
             self.clock.tick(FPS)
 
