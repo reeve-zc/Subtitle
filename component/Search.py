@@ -49,7 +49,11 @@ class Search:
         else:
             self._input.state = False
 
-    def search_bar_key_down(self, event: pygame.event):
+    def key_down(self, event: pygame.event):
+        if self._state:
+            if event.key == pygame.K_ESCAPE:
+                self._state = False
+                return True
         if self._input.state:
             if event.key == pygame.K_RETURN:
                 if os.path.isdir("temp/"):

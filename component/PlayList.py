@@ -41,6 +41,16 @@ class PlayList:
             song = None
         return self._state, song
 
+    def key_down(self, event: pygame.event):
+        if self._state:
+            if event.key == pygame.K_ESCAPE:
+                self._state = False
+                return True
+            if event.key == pygame.K_LEFT:
+                self._song_view.change_page(-1)
+            if event.key == pygame.K_RIGHT:
+                self._song_view.change_page(1)
+
     def mov(self, pos):
         if self._state:
             self._song_view.mov(pos)

@@ -11,8 +11,6 @@ from setting import *
 
 class Player:
     def __init__(self, setting=DEFAULT_PLAYER_SETTING):
-        # AudioSegment.converter = "ffmpeg/ffmpeg.exe"
-        # AudioSegment.ffprobe = "ffmpeg/ffprobe.exe"
 
         pygame.mixer.init()
         self._music = pygame.mixer.music
