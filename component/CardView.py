@@ -48,7 +48,7 @@ class SongCardView(CardView):
         super().__init__((235, 115), (810, 530), 15, 6, 30)
         self._title = Text("字体管家方萌.TTF", "SONGS", 35, (self.rect.centerx, self.rect.top - 2), color=(46, 55, 52))
         self._play = Text("字体管家方萌.TTF", "play", 27, (self.rect.right - 80, self.rect.top - 2), color=(46, 55, 52))
-        self._page = Text("字体管家方萌.TTF", "01 / 02", 24, (self.rect.centerx, self.rect.bottom + 22),
+        self._page = Text("字体管家方萌.TTF", "01 / 02", 24, (self.rect.centerx, self.rect.bottom + 25),
                           color=(46, 55, 52))
 
         self._previous = Button('previous_list', (28, 28), (self.rect.left + 60, self.rect.bottom + 26))
@@ -87,15 +87,17 @@ class SongCardView(CardView):
         else:
             self._hover = False
 
+    def change_page(self, pages):
+        if 0 <= self.top_index + self.nums * pages < len(self.cards):
+            self.top_index += self.nums * pages
+
     def previous_btn_compressed(self):
         if self._previous.state:
-            if self.top_index - self.nums >= 0:
-                self.top_index -= self.nums
+            self.change_page(-1)
 
     def next_btn_compressed(self):
         if self._next.state:
-            if self.top_index // self.nums + 1 < len(self.cards) // self.nums + 1:
-                self.top_index += self.nums
+            self.change_page(1)
 
     def mov(self, pos):
         self._play_hover(pos)
@@ -221,7 +223,7 @@ class TodoCardView(CardView):
             if index is not None:
                 self.delete_card(index)
 
-    def todo_list_key_down(self, event):
+    def key_down(self, event):
         cards = self.cards[self.top_index: min(self.top_index + self.nums, len(self.cards))]
         for card in cards:
             card.card_key_down(event)

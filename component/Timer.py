@@ -16,6 +16,7 @@ class Timer:
         self.counting = False
         self.end = False
         self.state = False
+        self._active = True
         self.zero_state = False
         self.enable_pause = True #解決在執行過程中切換模式會直接開始的問題
         self.temp_mode = WORKING_LENGTH #解決歸零切換模式會跑掉的問題
@@ -74,8 +75,9 @@ class Timer:
         self.timer_text.show(screen)
 
     def pressed(self, pos):  # 被按下的瞬間的設定_動作集合
-        self._current_time_pressed(pos)
-        self._mode_select_pressed(pos)
+        if self._active:
+            self._current_time_pressed(pos)
+            self._mode_select_pressed(pos)
 
     def compressed(self):  # 按下放開瞬間的讀取_動作集合
         self._count_compressed()

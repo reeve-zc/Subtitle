@@ -11,8 +11,6 @@ from setting import *
 
 class Player:
     def __init__(self, setting=DEFAULT_PLAYER_SETTING):
-        # AudioSegment.converter = "ffmpeg/ffmpeg.exe"
-        # AudioSegment.ffprobe = "ffmpeg/ffprobe.exe"
 
         pygame.mixer.init()
         self._music = pygame.mixer.music
@@ -246,6 +244,8 @@ class SongName:
 
         self.surface.blit(self.name, (self.x, 0))
         self.surface.blit(self.name, (self.x + self.name.get_width(), 0))
+        if self.name.get_width() < 572:
+            self.surface.blit(self.name, (self.x + self.name.get_width() * 2, 0))
         screen.blit(self.surface, (X_START, SONG_NAME_Y))
 
     @property

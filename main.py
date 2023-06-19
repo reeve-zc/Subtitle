@@ -85,15 +85,18 @@ class Game:
                         self.player._active = False
                         self.todolist._active = False
                         self.playlist._active = False
+                        self.timer._active = False
                     elif state:
                         self.player._active = False
                         self.todolist._active = False
                         self.search._active = False
+                        self.timer._active = False
                     else:
                         self.player._active = True
                         self.todolist._active = True
                         self.search._active = True
                         self.playlist._active = True
+                        self.timer._active = True
 
                     if song:
                         self.player.change_song("musics/" + song)
@@ -104,8 +107,13 @@ class Game:
                     self.player.mov(event.pos)
 
                 if event.type == pygame.KEYDOWN:
-                    self.todolist.todo_list_key_down(event)
-                    self.search.search_bar_key_down(event)
+                    self.todolist.key_down(event)
+                    if self.search.key_down(event) or self.playlist.key_down(event):
+                        self.player._active = True
+                        self.todolist._active = True
+                        self.search._active = True
+                        self.playlist._active = True
+                        self.timer._active = True
 
             self.background.load_bg_img(self.screen)
 
