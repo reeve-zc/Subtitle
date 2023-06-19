@@ -33,7 +33,6 @@ class Player:
         self._btn_play = Button("play", (75, 75), (1015, 150))
         self._btn_pause = Button("pause", (65, 65), (1015, 150))
         self._btn_reset = Button("reset", (60, 60), (1070, 150))
-        # self._btn_reset = Button("setting", (60, 60), (1070, 150))
 
     def change_song(self, filename):
         self._reset()
@@ -60,7 +59,7 @@ class Player:
         self._reset_btn_compressed()
         self._volume_btn_compressed()
 
-    def player_mov(self, pos):
+    def mov(self, pos):
         self._play_bar_mov(pos)
         self._sound_bar_mov(pos)
 

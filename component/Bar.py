@@ -143,3 +143,27 @@ class PlayBackBar(Bar):
     @property
     def line_rect(self):
         return self._line_rect
+
+
+class ScrollBar:
+    def __init__(self, x, y, width, length, scale, item_amount, color):
+        self._x, self._y, self._length = x, y, length
+        rect_length = item_amount / scale * length
+        self._rect = pygame.Rect(x - width / 2 + 4, y, width, rect_length)
+        self._color = color
+
+        self._last = (0, 0)
+        self._scale = scale
+        self._state = False
+
+    def get_pos(self):
+        delta_x = self._rect.centerx - self._x
+        return delta_x / (self._length / self._scale)
+
+    def set_pos(self, pos):
+        mx = clamp(self._x, self._x + self._length, pos[0])
+        self._rect.centerx = mx
+
+    def show(self, screen: pygame.Surface):
+        pygame.draw.line(screen, self._color, (self._x, self._y), (self._x, self._y + self._length), width=8)
+        pygame.draw.rect(screen, self._color, self._rect, border_radius=6)

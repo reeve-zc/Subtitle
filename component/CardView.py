@@ -4,7 +4,7 @@ import pygame
 
 from setting import *
 from component.Button import Button
-from component.Card import Card, TodoCard
+from component.Card import TextCard, TodoCard
 from component.Text import Text
 
 
@@ -43,6 +43,97 @@ class CardView:
             card.show(screen)
 
 
+class SongCardView(CardView):
+    def __init__(self, song_list):
+        super().__init__((235, 115), (810, 530), 15, 6, 30)
+        self._title = Text("字体管家方萌.TTF", "SONGS", 35, (self.rect.centerx, self.rect.top - 2), color=(46, 55, 52))
+        self._play = Text("字体管家方萌.TTF", "play", 27, (self.rect.right - 80, self.rect.top - 2), color=(46, 55, 52))
+        self._page = Text("字体管家方萌.TTF", "01 / 02", 24, (self.rect.centerx, self.rect.bottom + 22),
+                          color=(46, 55, 52))
+
+        self._previous = Button('previous_list', (28, 28), (self.rect.left + 60, self.rect.bottom + 26))
+        self._next = Button('next_list', (28, 28), (self.rect.right - 60, self.rect.bottom + 26))
+        self._hover = False
+        self.cards_initial(song_list)
+
+    def update_song_list(self, song_list):
+        self.cards = []
+        self.cards_initial(song_list)
+
+    def cards_initial(self, song_list):
+        for index in range(len(song_list)):
+            self.add_card()
+            self.cards[index].text = str(index + 1) + '. ' + song_list[index]
+
+    def add_card(self):
+        self.cards.append(
+            TextCard(self.card_size, (0, 0), '', self.card_size[1] // 4, font='华康皮皮体 W5.TTC', color=None))
+
+    def _play_btn_pressed(self, pos):
+        if self._play.rect.collidepoint(pos):
+            self._play._state = True
+
+    def _play_btn_compressed(self):
+        if self._play.state:
+            self._play._state = False
+            index = self.get_selected_card()
+            if index is not None:
+                return index
+        return None
+
+    def _play_hover(self, pos):
+        if self._play.rect.collidepoint(pos):
+            self._hover = True
+        else:
+            self._hover = False
+
+    def previous_btn_compressed(self):
+        if self._previous.state:
+            if self.top_index - self.nums >= 0:
+                self.top_index -= self.nums
+
+    def next_btn_compressed(self):
+        if self._next.state:
+            if self.top_index // self.nums + 1 < len(self.cards) // self.nums + 1:
+                self.top_index += self.nums
+
+    def mov(self, pos):
+        self._play_hover(pos)
+
+    def pressed(self, pos):
+        self._play_btn_pressed(pos)
+        self._previous.pressed(pos)
+        self._next.pressed(pos)
+
+        if self._play.state:
+            return
+
+        cards = self.cards[self.top_index: min(self.top_index + self.nums, len(self.cards))]
+        for card in cards:
+            card.pressed(pos)
+
+    def compressed(self):
+        self.previous_btn_compressed()
+        self.next_btn_compressed()
+        song_index = self._play_btn_compressed()
+        cards = self.cards[self.top_index: min(self.top_index + self.nums, len(self.cards))]
+        for card in cards:
+            card.compressed()
+        return song_index
+
+    def show(self, screen):
+        self._page.update(str(self.top_index // self.nums + 1) + ' / ' + str(len(self.cards) // self.nums + 1))
+        super().show(screen)
+        if self._hover:
+            pygame.draw.line(screen, DEFAULT_COLOR_SELECT, self._play.rect.bottomleft, self._play.rect.bottomright,
+                             width=2)
+        self._title.show(screen)
+        self._play.show(screen)
+        self._page.show(screen)
+        self._previous.show(screen)
+        self._next.show(screen)
+
+
 class TodoCardView(CardView):
     def __init__(self):
         super().__init__((90, 210), (350, 460), 15, 5, 30)
@@ -68,8 +159,7 @@ class TodoCardView(CardView):
                     return
                 for index in range(len(texts)):
                     self.add_card()
-                    print("hello")
-                    self.cards[index].input.word = texts[index]
+                    self.cards[index].input.update(texts[index])
 
     def animation(self):
         index = self.get_selected_card()

@@ -13,7 +13,7 @@ from utils.get_audio import get_info, download_song
 
 class Search:
     def __init__(self):
-        self._btn_search = Button("search", (90, 90), (270, 120))
+        self._btn_search = Button("search", (90, 90), (260, 120))
         self._btn_mp3_download = Button("button", (635, 95), (WIDTH / 2 + 3, 520))
         self._input = SearchInput('searchbar', (SEARCH_BAR_WIDTH, SEARCH_BAR_HEIGHT), SEARCH_BAR_CENTER, 420, length=40)
         self._floating_interface = FloatingInterface((SEARCH_SURFACE_WIDTH, SEARCH_SURFACE_HEIGHT))

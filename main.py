@@ -25,7 +25,6 @@ class Game:
 
     def run(self):
         btn_music = Button("setting", (82, 82), (120, 120))
-        btn_next = Button("next", (60, 60), (1130, 150))
 
         pygame.time.set_timer(pygame.USEREVENT, self.background.fps)
         pygame.time.set_timer(pygame.USEREVENT + 1, self.player.song_name.fps)
@@ -35,8 +34,7 @@ class Game:
         t = pygame.time.get_ticks()
         get_ticks_last_frame = t
 
-        self.player.change_song(
-            "musics/Dua Lipa - Levitating Featuring DaBaby (Official Music Video).mp3")
+        self.player.change_song("musics/" + self.playlist.songs[0])
 
         while True:
             t = pygame.time.get_ticks()
@@ -70,12 +68,13 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.player.compressed()
                     self.todolist.compressed()
+                    state, song = self.playlist.compressed()
 
                     if self.search.compressed():
                         self.player._active = False
                         self.todolist._active = False
                         self.playlist._active = False
-                    elif self.playlist.compressed():
+                    elif state:
                         self.player._active = False
                         self.todolist._active = False
                         self.search._active = False
@@ -85,9 +84,13 @@ class Game:
                         self.search._active = True
                         self.playlist._active = True
 
+                    if song:
+                        self.player.change_song("musics/" + song)
+
                 if event.type == pygame.MOUSEMOTION:
                     # print(event.pos)
-                    self.player.player_mov(event.pos)
+                    self.playlist.mov(event.pos)
+                    self.player.mov(event.pos)
 
                 if event.type == pygame.KEYDOWN:
                     self.todolist.todo_list_key_down(event)
@@ -96,7 +99,6 @@ class Game:
             self.background.load_bg_img(self.screen)
 
             btn_music.show(self.screen)
-            btn_next.show(self.screen)
 
             self.player.show(self.screen, delta_time)
             self.todolist.show(self.screen)
