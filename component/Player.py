@@ -244,6 +244,8 @@ class SongName:
 
         self.surface.blit(self.name, (self.x, 0))
         self.surface.blit(self.name, (self.x + self.name.get_width(), 0))
+        if self.name.get_width() < 572:
+            self.surface.blit(self.name, (self.x + self.name.get_width() * 2, 0))
         screen.blit(self.surface, (X_START, SONG_NAME_Y))
 
     @property
