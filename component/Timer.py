@@ -17,6 +17,8 @@ class Timer:
         self.end = False
         self.state = False
         self.zero_state = False
+        self.enable_pause = True #解決在執行過程中切換模式會直接開始的問題
+        self.temp_mode = WORKING_LENGTH #解決歸零切換模式會跑掉的問題
 
         self.mode = 0
         self.round = [0, 0, 0]
@@ -29,7 +31,12 @@ class Timer:
         self.fps_counter = pygame.USEREVENT + 2
 
     def animation(self):
-        self.current_time = self.current_time - 1 if self.current_time >= 0 else 0
+        if self.current_time >=0:
+            self.current_time = self.current_time-1
+        else:
+            # self.current_time = self.tempmode
+            self.current_time = 0
+        # self.current_time = self.current_time - 1 if self.current_time >= 0 else 0
 
     def update_time(self, time):
         self.current_time = time
@@ -44,6 +51,7 @@ class Timer:
                 self.zero_state = False
             self.counting = False
             self.end = True
+            # print(f"enable pause is {self.enable_pause}")
             return "00:00"
         else:
             self.zero_state = True
@@ -75,28 +83,38 @@ class Timer:
     def _current_time_pressed(self, pos):
         if self.timer_text.rect.collidepoint(pos):
             self.state = True
+            self.enable_pause = True
         else:
             self.state = False
 
     def _count_compressed(self):
-        if self.state:
+        if self.state and self.enable_pause is True:
             if self.end:
-                self.current_time = WORKING_LENGTH
+                self.current_time = self.temp_mode
                 self.end = False
             self.counting = not self.counting
-
+            self.enable_pause = False
     def _mode_select_pressed(self, pos):
         if self.mode_working.rect.collidepoint(pos):  # normal
+            self.enable_pause = False
+            self.counting = False
             self.state = True
             self.mode = 0
             self.current_time = TIME_LENGTH[self.mode]
+            self.temp_mode = self.current_time
 
         elif self.mode_short_break.rect.collidepoint(pos):  # short break
+            self.enable_pause = False
+            self.counting = False
             self.state = True
             self.mode = 1
             self.current_time = TIME_LENGTH[self.mode]
+            self.temp_mode = self.current_time
 
         elif self.mode_long_break.rect.collidepoint(pos):  # long break
+            self.enable_pause = False
+            self.counting = False
             self.state = True
             self.mode = 2
             self.current_time = TIME_LENGTH[self.mode]
+            self.temp_mode = self.current_time
