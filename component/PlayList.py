@@ -9,7 +9,7 @@ from component.CardView import SongCardView
 class PlayList:
     def __init__(self):
         self._btn_playlist = Button("playlist", (80, 80), (190, 120))
-        self._btn_next = Button("next", (60, 60), (1130, 150))
+        self._btn_next = Button("next", (60, 60), (1060, 190))
         self._floating_interface = FloatingInterface((1200, 1200))
 
         self._index = 0

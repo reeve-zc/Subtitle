@@ -136,7 +136,7 @@ class SongCardView(CardView):
 
 class TodoCardView(CardView):
     def __init__(self):
-        super().__init__((90, 210), (350, 460), 15, 5, 30)
+        super().__init__((90, 210), (350, 425), 15, 4, 30)
         self._title = Text("字体管家方萌.TTF", "TODO", 35, (self.rect.left - 4, self.rect.top - 15), pos_type='midleft',
                            color=DEFAULT_COLOR)
         self._btn_edit = Button('edit', (70, 70), (self.rect.right - 120, self.rect.top - 13))
@@ -160,6 +160,7 @@ class TodoCardView(CardView):
                 for index in range(len(texts)):
                     self.add_card()
                     self.cards[index].input.update(texts[index])
+                    self.cards[index].input.enter()
 
     def animation(self):
         index = self.get_selected_card()
